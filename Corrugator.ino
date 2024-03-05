@@ -1,19 +1,17 @@
 /*
-    Code for 2017 Season Box Bots robot control board
-    Arduino Nano clone w/ CH340 USB connected to TB6612 motor driver board
+    Corrugator
 
-    CH1 - Steering
-    CH2 - Throttle
-    CH3 - Other
+    Cardboard based combat robot using an electric chainsaw for a weapon.
+
+    Arduino Nano control board.
+    TB6612FNG Dual H-Bridge carrier board for motor control.
+    2x Inland (Microcenter) 2 channel relay boards for weapon power and weapon direction control.
+    2.4 Ghz 6 channel RC controller - off brand, channel 2 doesn't work yet
+
+    Joshua Brown 2024
 */
 
-#define   lpwm    6     // pulse width modulation for left motor is pin 3
-#define   lpin1   8    // left control pin one is pin 4
-#define   lpin2   9     // left control pin two is pin 5
-#define   standby 7     // standby pin is 6 - LOW=motor driver off, HIGH=motor driver on for new board
-#define   rpin1   5     // right control pin one is pin 7
-#define   rpin2   4     // right control pin two is pin 8
-#define   rpwm    3     // pulse width modulation for right motor is pin 9 for new board 
+#include "box-bots-v1.h"
 
 #define   forward 0
 #define   reverse 1
