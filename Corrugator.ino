@@ -15,8 +15,19 @@
 
 #define sawPowerPin 19
 #define sawDirectionPin 18
+
+// weapon states
+// #define sawPaused 0
+// #define sawForward 1
+// #define sawBackwards 2
+
+#define forwards true
+#define backwards false
 #define relayOpen HIGH
 #define relayClosed LOW
+bool previousButtonState = false;
+bool previousSawDirection = forwards;
+bool previousSawPower = false;
 
 void setup() {
   // do the usual setup for box bots
@@ -34,11 +45,13 @@ void setup() {
 
 // standard arduino loop, on box-bots runs about 30 times a second (Hz).
 void loop() {
-
+  // the MN-6 rx 2.4 Ghz 6 channel RC receiver needs a minimum 3ms delay after every pulse in.
   ch1 = pulseIn(in_ch1, HIGH, maxWait); // Steering : 1000 Left, 2000 Right
-  // delay(5); // the MN-6 rx needs a delay between these two pulseIn commands...
+  delay(5);
   ch2 = pulseIn(in_ch2, HIGH, maxWait); // Throttle : 1000 Reverse, 2000 Forward
+  delay(5);
   ch3 = pulseIn(in_ch3, HIGH, maxWait); // Weapon : 1000 Reverse, 2000 Forward, 1300 to 1700 OFF!
+  delay(5);
 
   Serial.print("ch1: ");
   Serial.print(ch1);
@@ -55,7 +68,7 @@ void loop() {
     ch2 = 1500;
   }
 
-  if (ch3 < 800) {
+  if (ch3 < 800 || ch3 > 2200) {
     ch3 = 1500;
   }
 
@@ -97,17 +110,30 @@ void loop() {
   analogWrite(rpwm, abs(rightMotorSpeed));
 
   // handle the weapon signal
-  if (ch3 > 1700) {
-    digitalWrite(sawPowerPin, relayClosed);
-    digitalWrite(sawDirectionPin, relayOpen);
-  } else if (ch3 < 1300) {
-    digitalWrite(sawPowerPin, relayClosed);
-    digitalWrite(sawDirectionPin, relayClosed);
-  } else {
-    digitalWrite(sawPowerPin, relayOpen);
-    digitalWrite(sawDirectionPin, relayOpen);
-  }
+  // alternating between on and off,
+  // and forward and backward
+  bool currentButtonState = ch3 >= 1500;
 
-  delay(5);  // helps with stability, I believe, will need to experiment
+  if (currentButtonState != previousButtonState) { // button state changed
+    delay(100);  // let relay stabilize
+    previousButtonState = currentButtonState;
+    
+    if (previousSawPower) { // turn it off
+      previousSawPower = false;
+      digitalWrite(sawPowerPin, relayOpen);
+    } else { // procedure for changing direction
+      digitalWrite(sawPowerPin, relayOpen);
+      if (previousSawDirection) { // was going forward last time
+        digitalWrite(sawDirectionPin, relayOpen); // so go backwards
+      } else {
+        digitalWrite(sawDirectionPin, relayClosed); // was backwards, so go forward
+      }
+      
+      previousSawPower = true;
+      previousSawDirection = !previousSawDirection; // store current value
+
+      digitalWrite(sawPowerPin, relayClosed); // power it on
+    }
+  }
 }
 
