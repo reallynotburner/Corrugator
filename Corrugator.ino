@@ -16,11 +16,6 @@
 #define sawPowerPin 19
 #define sawDirectionPin 18
 
-// weapon states
-// #define sawPaused 0
-// #define sawForward 1
-// #define sawBackwards 2
-
 #define forwards true
 #define backwards false
 #define relayOpen HIGH
@@ -60,7 +55,7 @@ void loop() {
   Serial.print(", ch3: ");
   Serial.println(ch3);
 
-  // handle the case in which the signals are too low to make sense
+  // handle the case in which the pulse widths are too brief to make sense
   if (ch1 < 800) {
     ch1 = 1500;
   }
@@ -72,8 +67,8 @@ void loop() {
     ch3 = 1500;
   }
 
-  ch1 = map(ch1, 1000, 2000, -255, 255); //center over 500
-  ch2 = map(ch2, 1000, 2000, -255, 255); //center over 500
+  ch1 = map(ch1, 1000, 2000, -255, 255); // center over 1500
+  ch2 = map(ch2, 1000, 2000, -255, 255); // center over 1500
 
   if (abs(ch1) < deadBand) {
     ch1 = 0;
@@ -102,8 +97,7 @@ void loop() {
     motorFunction(forward, leftMotor);
     leftMotorSpeed = (int)(leftMotorSpeed);
   }
-  if (oldDirection != newDirection) {
-  }
+ 
   oldDirection = newDirection;
 
   analogWrite(lpwm, abs(leftMotorSpeed));
